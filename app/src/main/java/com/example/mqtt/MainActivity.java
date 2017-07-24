@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
   MqttAndroidClient mqttAndroidClient;
 
   //final String serverUri = "tcp://iot.eclipse.org:1883";
-  final String serverUri = "85.119.83.194g:1883";
+  final String serverUri = "85.119.83.194:1883";
 
   String clientId = "HumaniqChatTest";
   final String subscriptionTopic = "humaniqTestSubscription";
