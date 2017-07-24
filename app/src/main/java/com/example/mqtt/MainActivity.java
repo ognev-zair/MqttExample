@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
   MqttAndroidClient mqttAndroidClient;
 
   //final String serverUri = "tcp://iot.eclipse.org:1883";
-  final String serverUri = "85.119.83.194:1883";
+  final String serverUri =  "ws://broker.hivemq.com:8000";
 
   String clientId = "HumaniqChatTest";
   final String subscriptionTopic = "humaniqTestSubscription";
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     mRecyclerView.setAdapter(mAdapter);
 
     clientId = clientId + System.currentTimeMillis();
-
+    System.setProperty("http.keepAlive", "false");
     mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
     mqttAndroidClient.setCallback(new MqttCallbackExtended() {
       @Override
@@ -168,10 +168,16 @@ public class MainActivity extends AppCompatActivity {
       });
 
       // THIS DOES NOT WORK!
-      mqttAndroidClient.subscribe(subscriptionTopic, 0, new IMqttMessageListener() {
+      mqttAndroidClient.subscribe(publishTopic, 0, new IMqttMessageListener() {
         @Override
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
+        public void messageArrived(String topic, final MqttMessage message) throws Exception {
           // message Arrived!
+          runOnUiThread(new Runnable() {
+            @Override public void run() {
+              addToHistory(message.toString());
+            }
+          });
+
           System.out.println("Message: " + topic + " : " + new String(message.getPayload()));
         }
       });
@@ -188,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
       MqttMessage message = new MqttMessage();
       message.setPayload(publishMessage.getBytes());
       mqttAndroidClient.publish(publishTopic, message);
-      addToHistory("Message Published");
       if(!mqttAndroidClient.isConnected()){
         addToHistory(mqttAndroidClient.getBufferedMessageCount() + " messages in buffer.");
       }
